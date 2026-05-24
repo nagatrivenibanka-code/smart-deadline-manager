@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Sign Up</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+
+    <style>
+        body { margin:0; font-family:'Poppins'; }
+
+        .hero {
+            height:100vh;
+            background:url('https://images.unsplash.com/photo-1504384308090-c894fdcc538d') no-repeat center/cover;
+            position:relative;
+        }
+
+        .overlay {
+            position:absolute;
+            width:100%;
+            height:100%;
+            background:rgba(0,0,0,0.6);
+        }
+
+        .box {
+            position:absolute;
+            top:50%;
+            left:50%;
+            transform:translate(-50%,-50%);
+            background:white;
+            padding:30px;
+            border-radius:10px;
+            width:320px;
+            text-align:center;
+        }
+
+        input,button {
+            width:100%;
+            padding:10px;
+            margin:10px 0;
+            box-sizing:border-box;
+        }
+
+        button {
+            background:#667eea;
+            color:white;
+            border:none;
+            cursor:pointer;
+        }
+
+        button:hover{
+            background:#5563d6;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="hero">
+<div class="overlay"></div>
+
+<div class="box">
+
+    <h2>Sign Up</h2>
+
+    <input id="username" placeholder="Username">
+    <input id="email" type="email" placeholder="Email">
+    <input id="phone" placeholder="Phone">
+    <input id="password" type="password" placeholder="Password">
+
+    <button onclick="register()">Create Account</button>
+
+    <p>Already have account? <a href="login.html">Login</a></p>
+
+</div>
+</div>
+
+<script>
+
+const API = "http://localhost:5000";
+
+async function register(){
+
+    const username = document.getElementById("username").value.trim();
+    const email = document.getElementById("email").value.trim();
+    const phone = document.getElementById("phone").value.trim();
+    const password = document.getElementById("password").value.trim();
+
+    if(!username || !email || !phone || !password){
+        alert("Please fill all fields");
+        return;
+    }
+
+    try{
+
+        const res = await fetch(`${API}/register`,{
+            method:"POST",
+            headers:{ "Content-Type":"application/json" },
+            body:JSON.stringify({ username, email, phone, password })
+        });
+
+        const data = await res.json();
+
+        alert(data.message);
+
+        if(data.message === "Registered successfully"){
+
+            // ✅ FIX: store login state
+            localStorage.setItem("user", username);
+            localStorage.setItem("loggedIn", "true");
+
+            // optional: direct login
+            window.location.href = "home.html";
+        }
+
+    }catch(err){
+        console.log(err);
+        alert("Backend not connected");
+    }
+}
+
+</script>
+
+</body>
+</html>

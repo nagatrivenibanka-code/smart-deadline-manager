@@ -1,0 +1,1336 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+<title>Smart Deadline Manager PRO</title>
+<link rel="icon" href="data:,">
+
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+<link href="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.css" rel="stylesheet">
+
+<script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<style>
+
+/* =========================
+   GLOBAL
+========================= */
+
+body{
+    margin:0;
+    font-family:'Poppins';
+    overflow:hidden;
+}
+
+.hidden{
+    display:none !important;
+}
+
+/* =========================
+   WELCOME PAGE
+========================= */
+
+#welcomePage{
+    height:100vh;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    background:url("https://images.unsplash.com/photo-1506784365847-bbad939e9335") center/cover no-repeat;
+    position:relative;
+    color:white;
+    text-align:center;
+}
+
+#welcomePage::before{
+    content:"";
+    position:absolute;
+    inset:0;
+    background:rgba(0,0,0,0.6);
+}
+
+.welcomeBox{
+    position:relative;
+    z-index:1;
+    max-width:700px;
+}
+
+.welcomeBox h1{
+    font-size:45px;
+    margin-bottom:10px;
+}
+
+.welcomeBox p{
+    font-size:18px;
+    opacity:0.9;
+}
+
+.startBtn{
+    margin-top:20px;
+    padding:12px 25px;
+    border:none;
+    border-radius:8px;
+    background:#1abc9c;
+    color:white;
+    font-size:16px;
+    cursor:pointer;
+}
+
+.features{
+    margin-top:30px;
+    display:flex;
+    gap:15px;
+    justify-content:center;
+    flex-wrap:wrap;
+}
+
+.feature{
+    background:rgba(255,255,255,0.1);
+    padding:15px;
+    border-radius:10px;
+    width:180px;
+}
+
+/* =========================
+   AUTH PAGE
+========================= */
+
+#authPage{
+    position:fixed;
+    inset:0;
+    background:#f4f6f9;
+    display:none;
+    justify-content:center;
+    align-items:center;
+    z-index:999;
+}
+
+#authPage.show{
+    display:flex;
+}
+
+.authBox{
+    width:320px;
+    background:white;
+    padding:30px;
+    border-radius:12px;
+    box-shadow:0 0 20px rgba(0,0,0,0.1);
+    text-align:center;
+}
+
+.authBox h2{
+    margin-bottom:20px;
+}
+
+.authBox input{
+    width:100%;
+    margin:10px 0;
+    padding:12px;
+    box-sizing:border-box;
+    border:1px solid #ccc;
+    border-radius:6px;
+}
+
+.authBox button{
+    width:100%;
+    padding:12px;
+    border:none;
+    background:#1abc9c;
+    color:white;
+    border-radius:8px;
+    cursor:pointer;
+    margin-top:10px;
+}
+
+/* =========================
+   DASHBOARD
+========================= */
+
+#app{
+    display:none;
+}
+
+#app.showDashboard{
+    display:block;
+}
+
+body.dashboard{
+    background:#f4f6f9;
+}
+
+/* SIDEBAR */
+
+.sidebar{
+    width:230px;
+    height:100vh;
+    background:#2c3e50;
+    padding:20px;
+    color:white;
+    position:fixed;
+    left:0;
+    top:0;
+}
+
+.sidebar button{
+    width:100%;
+    padding:12px;
+    margin:6px 0;
+    border:none;
+    background:#34495e;
+    color:white;
+    border-radius:6px;
+    cursor:pointer;
+    text-align:left;
+}
+
+.sidebar button:hover{
+    background:#1abc9c;
+}
+
+/* HEADER */
+
+.header{
+    position:fixed;
+    left:230px;
+    right:0;
+    top:0;
+    height:55px;
+    background:white;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding:0 20px;
+    border-bottom:1px solid #ddd;
+    z-index:100;
+}
+
+.logout-btn{
+    background:#e74c3c;
+    border:none;
+    padding:6px 12px;
+    color:white;
+    border-radius:5px;
+}
+
+/* MAIN */
+
+.main{
+    margin-left:230px;
+    margin-top:60px;
+    padding:20px;
+    width:calc(100% - 290px);
+}
+
+/* CARD */
+
+.card{
+    background:white;
+    padding:20px;
+    border-radius:8px;
+    height:calc(100vh - 120px);
+    overflow:auto;
+}
+
+/* TASK */
+
+.task{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding:12px;
+    margin:8px 0;
+    background:#f9f9f9;
+    border-radius:6px;
+}
+
+.task button{
+    border:none;
+    padding:8px 10px;
+    margin-left:5px;
+    border-radius:5px;
+    cursor:pointer;
+}
+
+/* INPUT */
+
+.input-group{
+    display:flex;
+    gap:10px;
+    margin-bottom:15px;
+    flex-wrap:wrap;
+}
+
+input{
+    padding:10px;
+    border:1px solid #ccc;
+    border-radius:5px;
+}
+
+.input-group button{
+    padding:10px 18px;
+    border:none;
+    background:#1abc9c;
+    color:white;
+    border-radius:5px;
+    cursor:pointer;
+}
+
+/* CALENDAR */
+
+#calendar{
+    height:75vh;
+}
+
+/* GRAPH */
+
+#weekly canvas{
+    width:100% !important;
+    height:70vh !important;
+}
+
+/* AI PANEL */
+
+.aiPanel{
+    position:fixed;
+    top:0;
+    right:-420px;
+    width:400px;
+    height:100vh;
+    background:white;
+    box-shadow:-2px 0 10px rgba(0,0,0,0.2);
+    transition:0.3s;
+    padding:15px;
+    overflow:auto;
+    z-index:999;
+}
+
+.aiPanel.open{
+    right:0;
+}
+
+.aiHeader{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    border-bottom:1px solid #ddd;
+    padding-bottom:10px;
+}
+
+.aiItem{
+    padding:10px;
+    margin:8px 0;
+    border-radius:6px;
+    background:#f4f6f9;
+}
+
+.high{
+    border-left:5px solid red;
+}
+
+.medium{
+    border-left:5px solid orange;
+}
+
+.low{
+    border-left:5px solid green;
+}
+
+.closeBtn{
+    cursor:pointer;
+    background:#e74c3c;
+    color:white;
+    border:none;
+    padding:5px 10px;
+    border-radius:5px;
+}
+
+</style>
+
+</head>
+<script type="module">
+
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+
+import {
+    getMessaging,
+    getToken,
+    onMessage
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-messaging.js";
+
+const firebaseConfig = {
+
+    apiKey: "AIzaSyCBKx-AaJnfU5QE0cythXGvBDnuLVPbqYY",
+
+    authDomain: "deadline-manager-6fe56.firebaseapp.com",
+
+    projectId: "deadline-manager-6fe56",
+
+    storageBucket: "deadline-manager-6fe56.firebasestorage.app",
+
+    messagingSenderId: "89730517722",
+
+    appId: "1:89730517722:web:0e6f40017491b2f1a9b3e3"
+
+};
+
+const app = initializeApp(firebaseConfig);
+
+const messaging = getMessaging(app);
+
+Notification.requestPermission()
+
+.then(async(permission)=>{
+
+    if(permission === "granted"){
+
+        console.log(
+            "Notification permission granted ✅"
+        );
+
+        const registration = await navigator.serviceWorker.register(
+    "./firebase-messaging-sw.js"
+);
+
+console.log("Service Worker Registered ✅");
+
+const token = await getToken(
+    messaging,
+    {
+        vapidKey:"BKFVMt4P_JrFkk72ODdNSlm36MetakmESq7wR0Klk3CSiZcFhDLH-NwWe5m1K5bocymVzY9sq_4hqMFMUkWn4hA",
+
+        serviceWorkerRegistration: registration
+    }
+);
+
+        console.log("FCM TOKEN:", token);
+        fetch("http://localhost:5000/save-token", {
+
+    method: "POST",
+
+    headers: {
+        "Content-Type": "application/json"
+    },
+
+    body: JSON.stringify({
+        token: token
+    })
+
+});
+    }
+
+    else{
+
+        console.log(
+            "Notification permission denied ❌"
+        );
+    }
+
+})
+
+.catch((err)=>{
+
+    console.log(err);
+
+});
+onMessage(messaging,(payload)=>{
+
+    console.log("Message received:", payload);
+
+    new Notification(
+    payload.notification.title,
+    {
+        body: payload.notification.body
+    }
+);
+
+});
+
+</script>
+
+<body>
+
+<!-- WELCOME PAGE -->
+
+<div id="welcomePage">
+
+    <div class="welcomeBox">
+
+        <h1>Smart Deadline Manager PRO</h1>
+
+        <p>
+            Organize tasks, track deadlines, and boost productivity with AI-powered planning.
+        </p>
+
+        <button class="startBtn" onclick="startApp()">
+            🚀 Get Started
+        </button>
+
+        <div class="features">
+
+            <div class="feature">📌 Tasks</div>
+
+            <div class="feature">📊 Analytics</div>
+
+            <div class="feature">🧠 AI Priority</div>
+
+            <div class="feature">📅 Calendar</div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<!-- LOGIN PAGE -->
+
+<!-- LOGIN / SIGNUP PAGE -->
+<div id="authPage">
+
+    <div class="authBox">
+
+        <h2 id="authTitle">Login</h2>
+
+        <!-- SIGNUP EXTRA FIELDS -->
+
+        <input
+            type="text"
+            id="fullName"
+            placeholder="Full Name"
+            class="hidden"
+        >
+
+        <input
+            type="email"
+            id="email"
+            placeholder="Email Address"
+            class="hidden"
+        >
+
+        <input
+            type="tel"
+            id="phone"
+            placeholder="Phone Number"
+            class="hidden"
+        >
+
+        <!-- COMMON FIELDS -->
+
+        <input
+            type="text"
+            id="username"
+            placeholder="Username"
+        >
+
+        <input
+            type="password"
+            id="password"
+            placeholder="Password"
+        >
+
+        <!-- BUTTON -->
+
+        <button id="authBtn" onclick="handleAuth()">
+            Login
+        </button>
+
+        <!-- TOGGLE -->
+
+        <p id="toggleText" style="margin-top:15px;">
+
+            New user?
+
+            <span
+                onclick="toggleMode()"
+                style="
+                    color:#1abc9c;
+                    cursor:pointer;
+                    font-weight:600;
+                "
+            >
+                Sign Up
+            </span>
+
+        </p>
+
+    </div>
+
+</div>
+
+<!-- DASHBOARD -->
+
+<div id="app">
+
+    <!-- SIDEBAR -->
+
+    <div class="sidebar">
+
+        <h2>Manager</h2>
+
+        <button onclick="showPage('tasks')">
+            <i class="fa fa-list"></i> Tasks
+        </button>
+
+        <button onclick="showPage('weekly')">
+            <i class="fa fa-chart-bar"></i> Stress Graph
+        </button>
+
+        <button onclick="showPage('calendarPage')">
+            <i class="fa fa-calendar"></i> Calendar
+        </button>
+
+        <button onclick="toggleAIPanel()">
+            <i class="fa fa-bolt"></i> AI Priority
+        </button>
+
+    </div>
+
+    <!-- HEADER -->
+
+    <div class="header">
+
+        <h4>Welcome</h4>
+
+        <button class="logout-btn" onclick="logout()">
+            Logout
+        </button>
+
+    </div>
+
+    <!-- MAIN -->
+
+    <div class="main">
+
+        <!-- TASK PAGE -->
+
+        <div id="tasks" class="card">
+
+            <h3>Tasks</h3>
+
+            <div class="input-group">
+
+                <input id="title" placeholder="Task Name">
+
+                <input id="date" type="date">
+
+                <button onclick="addTask()">
+                    Add
+                </button>
+
+            </div>
+
+            <div id="taskList"></div>
+
+        </div>
+
+        <!-- WEEKLY -->
+
+        <div id="weekly" class="card hidden">
+
+            <h3>Stress Analysis</h3>
+
+            <canvas id="chart"></canvas>
+
+        </div>
+
+        <!-- CALENDAR -->
+
+        <div id="calendarPage" class="card hidden">
+
+            <h3>Calendar</h3>
+
+            <div id="calendar"></div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<!-- AI PANEL -->
+
+<div class="aiPanel" id="aiPanel">
+
+    <div class="aiHeader">
+
+        <h3>AI Priority Tasks</h3>
+
+        <button class="closeBtn" onclick="toggleAIPanel()">
+            X
+        </button>
+
+    </div>
+
+    <div id="aiList"></div>
+
+</div>
+
+<script>
+
+const API = "http://localhost:5000";
+
+let calendar;
+let myChart;
+
+let isLogin = true;
+
+/* =========================
+   START APP
+========================= */
+
+function startApp(){
+
+    document.getElementById("welcomePage")
+    .classList.add("hidden");
+
+    document.getElementById("authPage")
+    .classList.add("show");
+}
+
+/* =========================
+   TOGGLE LOGIN / SIGNUP
+========================= */
+function toggleMode(){
+
+    isLogin = !isLogin;
+
+    const fullName =
+        document.getElementById("fullName");
+
+    const email =
+        document.getElementById("email");
+
+    const phone =
+        document.getElementById("phone");
+
+    if(isLogin){
+
+        document.getElementById("authTitle")
+        .innerText = "Login";
+
+        document.getElementById("authBtn")
+        .innerText = "Login";
+
+        fullName.classList.add("hidden");
+        email.classList.add("hidden");
+        phone.classList.add("hidden");
+
+        document.getElementById("toggleText")
+        .innerHTML = `
+
+            New user?
+
+            <span
+                onclick="toggleMode()"
+                style="
+                    color:#1abc9c;
+                    cursor:pointer;
+                    font-weight:600;
+                "
+            >
+                Sign Up
+            </span>
+        `;
+    }
+
+    else{
+
+        document.getElementById("authTitle")
+        .innerText = "Sign Up";
+
+        document.getElementById("authBtn")
+        .innerText = "Create Account";
+
+        fullName.classList.remove("hidden");
+        email.classList.remove("hidden");
+        phone.classList.remove("hidden");
+
+        document.getElementById("toggleText")
+        .innerHTML = `
+
+            Already have account?
+
+            <span
+                onclick="toggleMode()"
+                style="
+                    color:#1abc9c;
+                    cursor:pointer;
+                    font-weight:600;
+                "
+            >
+                Login
+            </span>
+        `;
+    }
+}
+
+/* =========================
+   HANDLE LOGIN / SIGNUP
+========================= */
+
+async function handleAuth(){
+
+    const username =
+        document.getElementById("username")
+        .value
+        .trim();
+
+    const password =
+        document.getElementById("password")
+        .value
+        .trim();
+
+    const fullName =
+    document.getElementById("fullName")
+    .value
+    .trim();
+
+const email =
+    document.getElementById("email")
+    .value
+    .trim();
+
+const phone =
+    document.getElementById("phone")
+    .value
+    .trim();    
+
+    if(username === "" || password === ""){
+
+        alert("Please fill all fields");
+
+        return;
+    }
+
+    /* =========================
+       SIGNUP
+    ========================= */
+
+    if(!isLogin){
+
+        try{
+
+            const res = await fetch(`${API}/signup`,{
+
+                method:"POST",
+
+                headers:{
+                    "Content-Type":"application/json"
+                },
+
+                body:JSON.stringify({
+
+                 fullName,
+                 email,
+                phone,
+                 username,
+                password
+
+        })
+
+            });
+
+            const data = await res.json();
+
+            alert(data.message || "Signup successful");
+
+            toggleMode();
+
+        }
+
+        catch(err){
+
+            console.log(err);
+
+            alert("Signup failed");
+        }
+
+        return;
+    }
+
+    /* =========================
+       LOGIN
+    ========================= */
+
+    try{
+
+        const res = await fetch(`${API}/login`,{
+
+            method:"POST",
+
+            headers:{
+                "Content-Type":"application/json"
+            },
+
+            body:JSON.stringify({
+                username,
+                password
+            })
+
+        });
+
+        const data = await res.json();
+
+        console.log(data);
+
+        if(
+            data.success === true ||
+            data.message === "Login success" ||
+            data.message?.toLowerCase().includes("success")
+        ){
+
+            localStorage.setItem("user", username);
+
+            document.getElementById("authPage")
+            .classList.remove("show");
+
+            document.getElementById("authPage")
+            .style.display = "none";
+
+            document.getElementById("app")
+            .classList.add("showDashboard");
+
+            document.body.classList.add("dashboard");
+
+            setTimeout(() => {
+
+                if(calendar){
+
+                    calendar.render();
+                }
+
+            },300);
+
+        }
+
+        else{
+
+            alert("Wrong username or password");
+        }
+
+    }
+
+    catch(err){
+
+        console.log(err);
+
+        alert("Backend not connected");
+    }
+}
+
+/* =========================
+   PAGE SWITCH
+========================= */
+
+function showPage(id){
+
+    document.querySelectorAll(".card")
+    .forEach(c => c.classList.add("hidden"));
+
+    document.getElementById(id)
+    .classList.remove("hidden");
+
+    if(id === "calendarPage"){
+
+        setTimeout(() => {
+
+            if(calendar){
+
+                calendar.render();
+            }
+
+        },200);
+    }
+}
+
+/* =========================
+   AI PANEL
+========================= */
+
+function toggleAIPanel(){
+
+    document.getElementById("aiPanel")
+    .classList.toggle("open");
+}
+
+/* =========================
+   LOGOUT
+========================= */
+
+function logout(){
+
+    localStorage.clear();
+
+    location.reload();
+}
+
+/* =========================
+   DATE
+========================= */
+
+function parseDateOnly(dateStr){
+
+    const [y,m,d] =
+        dateStr.split("-").map(Number);
+
+    return new Date(y,m-1,d);
+}
+
+/* =========================
+   STATUS
+========================= */
+
+function getTaskStatus(dateStr){
+
+    const today = new Date();
+
+    const taskDate =
+        parseDateOnly(dateStr);
+
+    return taskDate <= today
+        ? "Completed"
+        : "Pending";
+}
+
+/* =========================
+   STRESS
+========================= */
+
+function predictStress(dateStr){
+
+    const today = new Date();
+
+    const taskDate =
+        parseDateOnly(dateStr);
+
+    const diff =
+        Math.ceil((taskDate - today)/(1000*60*60*24));
+
+    if(diff <= 0) return 100;
+
+    if(diff <= 3) return 85;
+
+    if(diff <= 7) return 70;
+
+    return 40;
+}
+
+/* =========================
+   PRIORITY
+========================= */
+
+function getPriority(dateStr){
+
+    const today = new Date();
+
+    const taskDate =
+        parseDateOnly(dateStr);
+
+    const diff =
+        Math.ceil((taskDate - today)/(1000*60*60*24));
+
+    if(diff <= 3) return "HIGH";
+
+    if(diff <= 7) return "MEDIUM";
+
+    return "LOW";
+}
+
+/* =========================
+   ADD TASK
+========================= */
+
+async function addTask(){
+
+    const title =
+        document.getElementById("title").value;
+
+    const date =
+        document.getElementById("date").value;
+
+    if(!title || !date){
+
+        alert("Please enter all fields");
+
+        return;
+    }
+
+    await fetch(`${API}/add`,{
+
+        method:"POST",
+
+        headers:{
+            "Content-Type":"application/json"
+        },
+
+        body:JSON.stringify({
+            title,
+            date
+        })
+
+    });
+
+    document.getElementById("title").value = "";
+
+    document.getElementById("date").value = "";
+
+    load();
+}
+
+/* =========================
+   DELETE
+========================= */
+
+async function deleteTask(id){
+
+    await fetch(`${API}/delete/${id}`,{
+        method:"DELETE"
+    });
+
+    load();
+}
+
+/* =========================
+   UPDATE
+========================= */
+
+async function updateTask(id){
+
+    const t = prompt("Enter Task");
+
+    const d = prompt("Enter Date YYYY-MM-DD");
+
+    if(!t || !d) return;
+
+    await fetch(`${API}/update/${id}`,{
+
+        method:"PUT",
+
+        headers:{
+            "Content-Type":"application/json"
+        },
+
+        body:JSON.stringify({
+            title:t,
+            date:d
+        })
+
+    });
+
+    load();
+}
+
+/* =========================
+   LOAD
+========================= */
+
+async function load(){
+
+    try{
+
+        const res =
+            await fetch(`${API}/deadlines`);
+
+        const data =
+            await res.json();
+
+        document.getElementById("taskList")
+        .innerHTML = "";
+
+        document.getElementById("aiList")
+        .innerHTML = "";
+
+        let weekly = [0,0,0,0,0,0,0];
+
+        let events = [];
+
+        data.forEach((t,i)=>{
+
+            const status =
+                getTaskStatus(t.date);
+
+            const stress =
+                predictStress(t.date);
+
+            const priority =
+                getPriority(t.date);
+
+            weekly[
+                new Date(t.date).getDay()
+            ] += stress;
+
+            /* TASKS */
+
+            document.getElementById("taskList")
+            .innerHTML += `
+
+            <div class="task">
+
+                <span>
+
+                    <b>${t.title}</b><br>
+
+                    ${t.date}
+
+                </span>
+
+                <div>
+
+                    <button onclick="updateTask(${i})">
+                        ✏️
+                    </button>
+
+                    <button onclick="deleteTask(${i})">
+                        ❌
+                    </button>
+
+                </div>
+
+            </div>
+            `;
+
+            /* CALENDAR */
+
+            events.push({
+
+                title:
+                    `${t.title} (${status})`,
+
+                date:t.date,
+
+                color:
+                    status === "Completed"
+                    ? "green"
+                    : "orange"
+
+            });
+
+            /* AI PANEL */
+
+            document.getElementById("aiList")
+            .innerHTML += `
+
+            <div class="
+                aiItem
+                ${priority==="HIGH"
+                    ? "high"
+                    : priority==="MEDIUM"
+                    ? "medium"
+                    : "low"}
+            ">
+
+                <b>${t.title}</b><br>
+
+                ${t.date}<br>
+
+                Status : ${status}<br>
+
+                Stress : ${stress}%
+
+            </div>
+            `;
+        });
+
+        drawChart(weekly);
+
+        renderCalendar(events);
+
+    }
+
+    catch(err){
+
+        console.log(err);
+
+    }
+}
+
+/* =========================
+   CHART
+========================= */
+
+function drawChart(data){
+
+    if(myChart){
+
+        myChart.destroy();
+    }
+
+    myChart = new Chart(
+
+        document.getElementById("chart"),
+
+        {
+
+            type:"bar",
+
+            data:{
+
+                labels:[
+                    "Sun",
+                    "Mon",
+                    "Tue",
+                    "Wed",
+                    "Thu",
+                    "Fri",
+                    "Sat"
+                ],
+
+                datasets:[{
+
+                    label:"Stress Level",
+
+                    data:data
+
+                }]
+
+            },
+
+            options:{
+
+                responsive:true,
+
+                maintainAspectRatio:false
+
+            }
+
+        }
+
+    );
+}
+
+/* =========================
+   CALENDAR
+========================= */
+
+function renderCalendar(events){
+
+    const el =
+        document.getElementById("calendar");
+
+    if(calendar){
+
+        calendar.destroy();
+    }
+
+    calendar = new FullCalendar.Calendar(el,{
+
+        initialView:"dayGridMonth",
+
+        height:"100%",
+
+        events:events
+
+    });
+
+    calendar.render();
+}
+
+load();
+
+</script>
+
+</body>
+</html>

@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Smart Deadline Manager PRO</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+<link href="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<style>
+body{
+    margin:0;
+    font-family:'Poppins';
+    display:flex;
+    background:#f4f6f9;
+}
+
+.sidebar{
+    width:230px;
+    height:100vh;
+    background:#2c3e50;
+    padding:20px;
+    color:white;
+}
+
+.sidebar button{
+    width:100%;
+    padding:12px;
+    margin:6px 0;
+    border:none;
+    background:#34495e;
+    color:white;
+    border-radius:6px;
+    cursor:pointer;
+    text-align:left;
+}
+
+.sidebar button:hover{ background:#1abc9c; }
+
+.header{
+    position:fixed;
+    left:230px;
+    right:0;
+    top:0;
+    height:55px;
+    background:white;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding:0 20px;
+    border-bottom:1px solid #ddd;
+}
+
+.logout-btn{
+    background:#e74c3c;
+    border:none;
+    padding:6px 12px;
+    color:white;
+    border-radius:5px;
+}
+
+.main{
+    margin-left:230px;
+    margin-top:60px;
+    padding:20px;
+    width:100%;
+}
+
+.card{
+    background:white;
+    padding:20px;
+    border-radius:8px;
+    margin-bottom:20px;
+}
+
+.task{
+    display:flex;
+    justify-content:space-between;
+    padding:10px;
+    margin:6px 0;
+    background:#f9f9f9;
+    border-radius:6px;
+}
+
+.input-group{
+    display:flex;
+    gap:10px;
+    margin-bottom:15px;
+}
+
+input{
+    padding:8px;
+    border:1px solid #ccc;
+    border-radius:5px;
+}
+
+.hidden{ display:none; }
+
+/* CALENDAR */
+#calendar{
+    background:white;
+    padding:10px;
+    border-radius:8px;
+}
+
+/* =========================
+   🔥 AI PRIORITY PANEL
+========================= */
+.aiPanel{
+    position:fixed;
+    top:0;
+    right:-420px;
+    width:400px;
+    height:100vh;
+    background:white;
+    box-shadow:-2px 0 10px rgba(0,0,0,0.2);
+    transition:0.3s;
+    padding:15px;
+    overflow:auto;
+    z-index:999;
+}
+
+.aiPanel.open{
+    right:0;
+}
+
+.aiHeader{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    border-bottom:1px solid #ddd;
+    padding-bottom:10px;
+}
+
+.aiItem{
+    padding:10px;
+    margin:8px 0;
+    border-radius:6px;
+    background:#f4f6f9;
+}
+
+.high{ border-left:5px solid red; }
+.medium{ border-left:5px solid orange; }
+.low{ border-left:5px solid green; }
+
+.closeBtn{
+    cursor:pointer;
+    background:#e74c3c;
+    color:white;
+    border:none;
+    padding:5px 10px;
+    border-radius:5px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="sidebar">
+    <h2>Manager</h2>
+
+    <button onclick="showPage('tasks')"><i class="fa fa-list"></i> Tasks</button>
+    <button onclick="showPage('weekly')"><i class="fa fa-chart-bar"></i> Weekly</button>
+    <button onclick="showPage('calendarPage')"><i class="fa fa-calendar"></i> Calendar</button>
+
+    <button onclick="toggleAIPanel()"><i class="fa fa-bolt"></i> AI Priority</button>
+</div>
+
+<div class="header">
+    <h4>Welcome</h4>
+    <button class="logout-btn" onclick="logout()">Logout</button>
+</div>
+
+<div class="main">
+
+<!-- TASKS (RESTORED FULL) -->
+<div id="tasks" class="card">
+<h3>Tasks</h3>
+
+<div class="input-group">
+    <input id="title" placeholder="Task Name">
+    <input id="date" type="date">
+    <button onclick="addTask()">Add</button>
+</div>
+
+<div id="taskList"></div>
+</div>
+
+<!-- WEEKLY (RESTORED) -->
+<div id="weekly" class="card hidden">
+<h3>Weekly Analysis</h3>
+<canvas id="chart"></canvas>
+</div>
+
+<!-- CALENDAR -->
+<div id="calendarPage" class="card hidden">
+<h3>Calendar</h3>
+<div id="calendar"></div>
+</div>
+
+</div>
+
+<!-- AI PANEL -->
+<div class="aiPanel" id="aiPanel">
+    <div class="aiHeader">
+        <h3>AI Priority Tasks</h3>
+        <button class="closeBtn" onclick="toggleAIPanel()">X</button>
+    </div>
+    <div id="aiList"></div>
+</div>
+
+<script>
+
+const API = "http://localhost:5000";
+
+let calendar;
+let myChart;
+let tasks = [];
+
+/* PAGE SWITCH */
+function showPage(id){
+    document.querySelectorAll(".card").forEach(c => c.classList.add("hidden"));
+    document.getElementById(id).classList.remove("hidden");
+}
+
+/* AI PANEL */
+function toggleAIPanel(){
+    document.getElementById("aiPanel").classList.toggle("open");
+}
+
+/* DATE */
+function parseDateOnly(dateStr){
+    const [y, m, d] = dateStr.split("-").map(Number);
+    return new Date(y, m - 1, d);
+}
+
+/* STATUS */
+function getTaskStatus(dateStr){
+
+    const today = new Date();
+    const taskDate = parseDateOnly(dateStr);
+
+    return taskDate <= today ? "done" : "pending";
+}
+
+/* STRESS */
+function predictStress(dateStr){
+
+    const today = new Date();
+    const taskDate = parseDateOnly(dateStr);
+
+    const diff = Math.ceil((taskDate - today)/(1000*60*60*24));
+
+    if(diff <= 0) return 100;
+    if(diff <= 3) return 85;
+    if(diff <= 7) return 70;
+    return 40;
+}
+
+/* PRIORITY */
+function getPriority(dateStr){
+
+    const today = new Date();
+    const taskDate = parseDateOnly(dateStr);
+
+    const diff = Math.ceil((taskDate - today)/(1000*60*60*24));
+
+    if(diff <= 0) return "🔴 HIGH";
+    if(diff <= 3) return "🔴 HIGH";
+    if(diff <= 7) return "🟠 MEDIUM";
+    return "🟢 LOW";
+}
+
+/* ADD TASK (RESTORED) */
+async function addTask(){
+
+    const title = document.getElementById("title").value;
+    const date = document.getElementById("date").value;
+
+    if(!title || !date){
+        alert("Please enter all fields");
+        return;
+    }
+
+    await fetch(`${API}/add`,{
+        method:"POST",
+        headers:{"Content-Type":"application/json"},
+        body:JSON.stringify({title,date})
+    });
+
+    load();
+}
+
+/* DELETE */
+async function deleteTask(id){
+    await fetch(`${API}/delete/${id}`,{method:"DELETE"});
+    load();
+}
+
+/* UPDATE */
+async function updateTask(id){
+
+    const t = prompt("Enter Task");
+    const d = prompt("Enter Date YYYY-MM-DD");
+
+    if(!t || !d) return;
+
+    await fetch(`${API}/update/${id}`,{
+        method:"PUT",
+        headers:{"Content-Type":"application/json"},
+        body:JSON.stringify({title:t,date:d})
+    });
+
+    load();
+}
+
+/* LOAD EVERYTHING */
+async function load(){
+
+    const res = await fetch(`${API}/deadlines`);
+    const data = await res.json();
+
+    tasks = data;
+
+    document.getElementById("taskList").innerHTML = "";
+    document.getElementById("aiList").innerHTML = "";
+
+    let weekly = [0,0,0,0,0,0,0];
+    let events = [];
+
+    data.forEach((t,i)=>{
+
+        const priority = getPriority(t.date);
+        const status = getTaskStatus(t.date);
+        const stress = predictStress(t.date);
+
+        weekly[new Date(t.date).getDay()] += stress;
+
+        /* TASK LIST (RESTORED WITH EDIT/DELETE) */
+        document.getElementById("taskList").innerHTML += `
+        <div class="task">
+            <span>
+                ${t.title} - ${t.date}
+                (${status}) ${priority}
+            </span>
+            <div>
+                <button onclick="updateTask(${i})">✏️</button>
+                <button onclick="deleteTask(${i})">❌</button>
+            </div>
+        </div>
+        `;
+
+        /* CALENDAR */
+        events.push({
+            title:`${t.title} ${priority}`,
+            date:t.date,
+            color: priority==="🔴 HIGH" ? "red" : priority==="🟠 MEDIUM" ? "orange" : "green"
+        });
+
+        /* AI PANEL */
+        document.getElementById("aiList").innerHTML += `
+        <div class="aiItem ${priority.includes("HIGH")?"high":priority.includes("MEDIUM")?"medium":"low"}">
+            <b>${t.title}</b><br>
+            ${t.date}<br>
+            ${priority}
+        </div>
+        `;
+    });
+
+    drawChart(weekly);
+    renderCalendar(events);
+}
+
+/* CHART (RESTORED) */
+function drawChart(data){
+
+    if(myChart) myChart.destroy();
+
+    myChart = new Chart(document.getElementById("chart"),{
+        type:"bar",
+        data:{
+            labels:["Sun","Mon","Tue","Wed","Thu","Fri","Sat"],
+            datasets:[{
+                label:"AI Stress",
+                data:data
+            }]
+        }
+    });
+}
+
+/* CALENDAR */
+function renderCalendar(events){
+
+    const el = document.getElementById("calendar");
+
+    if(calendar) calendar.destroy();
+
+    calendar = new FullCalendar.Calendar(el,{
+        initialView:"dayGridMonth",
+        height:600,
+        events:events
+    });
+
+    calendar.render();
+}
+
+load();
+
+</script>
+
+</body>
+</html>

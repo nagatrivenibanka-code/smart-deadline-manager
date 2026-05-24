@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>About</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+
+    <style>
+        body { margin:0; font-family:'Poppins'; }
+
+        .hero {
+            height:100vh;
+            background:url('https://images.unsplash.com/photo-1521737604893-d14cc237f11d') no-repeat center/cover;
+            position:relative;
+        }
+
+        .overlay {
+            position:absolute;
+            width:100%; height:100%;
+            background:rgba(0,0,0,0.7);
+        }
+
+        .content {
+            position:absolute;
+            top:50%; left:50%;
+            transform:translate(-50%,-50%);
+            color:white;
+            text-align:center;
+            width:60%;
+        }
+
+        h1 { font-size:40px; }
+
+        p { font-size:18px; line-height:1.6; }
+    </style>
+</head>
+
+<body>
+
+<div class="hero">
+<div class="overlay"></div>
+
+<div class="content">
+    <h1>About Our Project</h1>
+
+    <p>
+        This Smart Deadline Manager helps users track tasks,
+        analyze stress levels, and improve productivity.
+        It uses visual dashboards, graphs, and timelines
+        to give clear insights.
+    </p>
+
+    <br>
+    <a href="home.html" style="color:white;">Go to Dashboard</a>
+</div>
+</div>
+
+</body>
+</html>
