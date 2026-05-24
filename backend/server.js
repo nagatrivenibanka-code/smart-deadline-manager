@@ -27,14 +27,11 @@ let notifiedTasks = [];
 // ======================
 // ✅ TEST ROUTE
 // ======================
-
-const path = require("path");
+//empty dont consider test route
 
 // ======================
 // 🌐 FRONTEND CONNECTION
 // ======================
-
-app.use(express.static(path.join(__dirname, "../frontend")));
 
 app.get("/", (req, res) => {
     res.sendFile(path.join(__dirname, "../frontend/index.html"));
