@@ -2,8 +2,11 @@ const express = require("express");
 const cors = require("cors");
 const cron = require("node-cron");
 const admin = require("./firebaseAdmin");
+const path = require("path");
+
 
 const app = express();
+app.use(express.static(path.join(__dirname, "../frontend")));
 
 // ======================
 // ✅ MIDDLEWARE
@@ -25,8 +28,16 @@ let notifiedTasks = [];
 // ✅ TEST ROUTE
 // ======================
 
+const path = require("path");
+
+// ======================
+// 🌐 FRONTEND CONNECTION
+// ======================
+
+app.use(express.static(path.join(__dirname, "../frontend")));
+
 app.get("/", (req, res) => {
-    res.send("Backend Working ✅");
+    res.sendFile(path.join(__dirname, "../frontend/index.html"));
 });
 
 // ======================
@@ -392,10 +403,8 @@ cron.schedule("* * * * *", async () => {
 // 🚀 START SERVER
 // ======================
 
-const PORT = 5000;
+const PORT = process.env.PORT || 5000;
 
 app.listen(PORT, () => {
-
-    console.log(`🚀 Server running on http://localhost:${PORT}`);
-
+  console.log(`🚀 Server running on port ${PORT}`);
 });
