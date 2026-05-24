@@ -1,14 +1,20 @@
 {
   "name": "backend",
   "version": "1.0.0",
-  "description": "",
-  "main": "hello.js",
+  "description": "Smart Deadline Manager PRO Backend",
+  "main": "server.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node server.js"
+    "start": "node server.js",
+    "test": "echo \"No tests specified\""
   },
-  "keywords": [],
-  "author": "",
+  "keywords": [
+    "deadline-manager",
+    "nodejs",
+    "express",
+    "firebase",
+    "notifications"
+  ],
+  "author": "Naga Triveni",
   "license": "ISC",
   "type": "commonjs",
   "dependencies": {
